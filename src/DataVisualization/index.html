@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>李小燕 & 李筱纯的电商订单数据分析平台</title>
+		<!-- 国内稳定CDN -->
+		<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+		<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="container">
+			<header class="header">
+				<div class="header-content">
+					<h1>电商用户消费行为可视化分析平台</h1>
+					<p>李小燕 & 李筱纯 | 深度挖掘用户消费特征与市场趋势</p>
+					<div class="header-tags">
+						<span class="header-tag"><i class="fa fa-database"></i> 数据源：Hive数据仓库</span>
+						<span class="header-tag"><i class="fa fa-line-chart"></i> 分析维度：9个核心指标</span>
+						<span class="header-tag"><i class="fa fa-users"></i> 数据规模：91条订单 / 30位用户</span>
+					</div>
+				</div>
+			</header>
+
+			<!-- 核心数据概览区 -->
+			<section class="data-summary">
+				<div class="section-header">
+					<h2><i class="fa fa-bar-chart"></i> 核心业务指标</h2>
+					<button class="refresh-btn" id="refresh-btn">
+						<i class="fa fa-refresh"></i> 刷新数据
+					</button>
+				</div>
+				<div class="summary-stats">
+					<div class="stat-item">
+						<div class="stat-icon"><i class="fa fa-shopping-cart"></i></div>
+						<div class="stat-value" id="total-orders">--</div>
+						<div class="stat-name">总订单数</div>
+						<div class="stat-change positive"><i class="fa fa-arrow-up"></i> 5.2% 环比上周</div>
+					</div>
+					<div class="stat-item success">
+						<div class="stat-icon"><i class="fa fa-users"></i></div>
+						<div class="stat-value" id="total-users">--</div>
+						<div class="stat-name">活跃用户数</div>
+						<div class="stat-change positive"><i class="fa fa-arrow-up"></i> 8.7% 环比上周</div>
+					</div>
+					<div class="stat-item warning">
+						<div class="stat-icon"><i class="fa fa-rmb"></i></div>
+						<div class="stat-value" id="total-sales">--</div>
+						<div class="stat-name">总销售额(元)</div>
+						<div class="stat-change positive"><i class="fa fa-arrow-up"></i> 12.3% 环比上周</div>
+					</div>
+					<div class="stat-item danger">
+						<div class="stat-icon"><i class="fa fa-tag"></i></div>
+						<div class="stat-value" id="avg-order-amount">--</div>
+						<div class="stat-name">平均客单价(元)</div>
+						<div class="stat-change negative"><i class="fa fa-arrow-down"></i> 2.1% 环比上周</div>
+					</div>
+					<div class="stat-item secondary">
+						<div class="stat-icon"><i class="fa fa-refresh"></i></div>
+						<div class="stat-value" id="avg-order-frequency">--</div>
+						<div class="stat-name">平均消费频次</div>
+						<div class="stat-change positive"><i class="fa fa-arrow-up"></i> 3.5% 环比上周</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- 核心图表区域 -->
+			<section class="chart-wrapper">
+				<!-- 用户订单量分布直方图 -->
+				<div class="chart-card">
+					<div class="chart-card-header">
+						<h2><i class="fa fa-bar-chart"></i> 用户订单量分布直方图</h2>
+						<div class="chart-actions">
+							<button class="chart-btn" title="下载图表" id="download-order-dist"><i
+									class="fa fa-download"></i></button>
+							<button class="chart-btn" title="切换主题" id="theme-order-dist"><i
+									class="fa fa-paint-brush"></i></button>
+						</div>
+					</div>
+					<div class="chart-container" id="order-distribution-chart"></div>
+				</div>
+
+				<!-- 月度销售额趋势图 -->
+				<div class="chart-card">
+					<div class="chart-card-header">
+						<h2><i class="fa fa-line-chart"></i> 月度销售额趋势图</h2>
+						<div class="chart-actions">
+							<button class="chart-btn" title="下载图表" id="download-monthly-sales"><i
+									class="fa fa-download"></i></button>
+							<button class="chart-btn" title="切换主题" id="theme-monthly-sales"><i
+									class="fa fa-paint-brush"></i></button>
+						</div>
+					</div>
+					<div class="chart-container" id="monthly-sales-chart"></div>
+				</div>
+			</section>
+
+			<!-- 辅助图表区域 -->
+			<section class="aux-charts-wrapper">
+				<!-- 客单价区间分布 -->
+				<div class="aux-chart-card">
+					<div class="chart-card-header">
+						<h2><i class="fa fa-pie-chart"></i> 客单价区间分布</h2>
+					</div>
+					<div class="aux-chart-container" id="price-range-chart"></div>
+				</div>
+
+				<!-- Top10用户消费排行 -->
+				<div class="aux-chart-card">
+					<div class="chart-card-header">
+						<h2><i class="fa fa-trophy"></i> Top10用户消费金额排行</h2>
+					</div>
+					<div class="aux-chart-container" id="top-user-chart"></div>
+				</div>
+
+				<!-- 每日订单量热力图 -->
+				<div class="aux-chart-card">
+					<div class="chart-card-header">
+						<h2><i class="fa fa-calendar"></i> 每日订单量热力图</h2>
+					</div>
+					<div class="aux-chart-container" id="daily-order-heatmap"></div>
+				</div>
+
+				<!-- 消费时段分布 -->
+				<div class="aux-chart-card">
+					<div class="chart-card-header">
+						<h2><i class="fa fa-clock-o"></i> 用户消费时段分布</h2>
+					</div>
+					<div class="aux-chart-container" id="time-period-chart"></div>
+				</div>
+			</section>
+
+			<!-- 数据表格区域 -->
+			<section class="data-table-section">
+				<div class="section-header">
+					<h2><i class="fa fa-table"></i> 订单数据明细表</h2>
+					<div class="search-box">
+						<input type="text" id="search-order" placeholder="搜索用户ID/订单金额">
+						<button class="refresh-btn" id="search-btn">
+							<i class="fa fa-search"></i> 搜索
+						</button>
+					</div>
+				</div>
+				<div class="table-wrapper">
+					<table class="data-table" id="order-table">
+						<thead>
+							<tr>
+								<th>订单ID</th>
+								<th>用户ID</th>
+								<th>订单金额(元)</th>
+								<th>下单时间</th>
+								<th>消费时段</th>
+								<th>金额等级</th>
+							</tr>
+						</thead>
+						<tbody id="order-table-body">
+							<!-- 数据通过JS动态填充 -->
+						</tbody>
+					</table>
+				</div>
+				<div class="table-pagination">
+					<div>显示 <span id="page-range">1-10</span> 条，共 <span id="total-table-rows">--</span> 条</div>
+					<div>
+						<button class="pagination-btn" id="prev-page" disabled><i class="fa fa-angle-left"></i></button>
+						<button class="pagination-btn active" data-page="1">1</button>
+						<button class="pagination-btn" data-page="2">2</button>
+						<button class="pagination-btn" data-page="3">3</button>
+						<button class="pagination-btn" id="next-page"><i class="fa fa-angle-right"></i></button>
+					</div>
+				</div>
+			</section>
+
+			<!-- 加载状态 -->
+			<div class="loading" id="loading">
+				<div class="loading-spinner"></div>
+				<div>加载数据中...</div>
+			</div>
+		</div>
+
+		<script src="script.js"></script>
+	</body>
+</html>
